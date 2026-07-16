@@ -1,7 +1,11 @@
 import { calculateUnitConversion, type UnitMapping } from "./conversion.js";
-import { buildAdjustmentPlan, type InventoryAdjustmentPlan } from "./shopify-adjustment.js";
+import {
+  buildShopifyAdjustmentPlan,
+  type ShopifyAdjustmentPlan,
+} from "./shopify-adjustment.js";
 
 export interface InventorySnapshot {
+  shopDomain: string;
   locationId: string;
   mapping: UnitMapping;
   caseQty: number;
@@ -16,12 +20,12 @@ export interface ConversionPreview extends InventorySnapshot {
   newCaseQty: number;
   newBaseQty: number;
   reason: string;
-  adjustmentPlan: InventoryAdjustmentPlan | null;
+  adjustmentPlan: ShopifyAdjustmentPlan | null;
 }
 
 export interface InventoryGateway {
   readAvailable(locationId: string, inventoryItemIds: string[]): Promise<Record<string, number>>;
-  apply(plan: InventoryAdjustmentPlan): Promise<{ transactionId: string }>;
+  apply(plan: ShopifyAdjustmentPlan): Promise<{ transactionId: string }>;
 }
 
 export interface PreviewStore {
@@ -38,11 +42,12 @@ function previewKey(locationId: string, mapping: UnitMapping, caseQty: number, b
 export async function previewConversion(args: {
   gateway: InventoryGateway;
   store: PreviewStore;
+  shopDomain: string;
   locationId: string;
   mapping: UnitMapping;
   allowBaseToCaseWhenCasesExist?: boolean;
 }): Promise<ConversionPreview> {
-  const { gateway, store, locationId, mapping } = args;
+  const { gateway, store, shopDomain, locationId, mapping } = args;
   if (mapping.enabled === false) throw new Error("This unit mapping is disabled.");
 
   const levels = await gateway.readAvailable(locationId, [
@@ -65,12 +70,19 @@ export async function previewConversion(args: {
   });
 
   const previewId = previewKey(locationId, mapping, caseQty, baseQty);
-  const adjustmentPlan = result.action === "NO_CONVERSION"
-    ? null
-    : buildAdjustmentPlan({ locationId, mapping, before: { caseQty, baseQty }, result, referenceId: previewId });
+  const adjustmentPlan = buildShopifyAdjustmentPlan({
+    shopDomain,
+    locationId,
+    mapping,
+    currentCaseQty: caseQty,
+    currentBaseQty: baseQty,
+    conversion: result,
+    runId: previewId,
+  });
 
   const preview: ConversionPreview = {
     previewId,
+    shopDomain,
     locationId,
     mapping,
     caseQty,
