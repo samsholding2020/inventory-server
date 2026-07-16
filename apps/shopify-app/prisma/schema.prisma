@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id            String   @id
+  shop          String
+  state         String
+  isOnline      Boolean  @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean  @default(false)
+  locale        String?
+  collaborator  Boolean? @default(false)
+  emailVerified Boolean? @default(false)
+}
+
+model UnitMapping {
+  id                      String   @id @default(cuid())
+  shop                    String
+  locationId              String
+  baseSku                 String
+  caseSku                 String
+  baseInventoryItemId     String
+  caseInventoryItemId     String
+  unitsPerCase            Int
+  minimumBaseUnits        Int      @default(1)
+  minimumCaseUnits        Int      @default(0)
+  enabled                  Boolean  @default(true)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@unique([shop, locationId, caseSku])
+  @@index([shop, locationId])
+}
+
+model ConversionRun {
+  id                String   @id @default(cuid())
+  shop              String
+  locationId        String
+  mappingId         String?
+  baseSku           String
+  caseSku           String
+  action            String
+  casesConverted    Int
+  previousCaseQty   Int
+  previousBaseQty   Int
+  newCaseQty        Int
+  newBaseQty        Int
+  status            String
+  transactionId     String?
+  errorMessage      String?
+  idempotencyKey    String   @unique
+  createdAt         DateTime @default(now())
+
+  @@index([shop, locationId, createdAt])
+}
