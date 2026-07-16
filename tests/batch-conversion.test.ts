@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { previewBatchConversions } from "../src/batch-conversion.js";
-import { InMemoryPreviewStore } from "../src/in-memory-preview-store.js";
+import { MemoryPreviewStore } from "../src/memory-preview-store.js";
 import type { InventoryGateway } from "../src/conversion-service.js";
 import type { ShopifyAdjustmentPlan } from "../src/shopify-adjustment.js";
 
@@ -41,7 +41,7 @@ describe("previewBatchConversions", () => {
         "case-29991": 0,
         "base-29991": 121,
       }),
-      store: new InMemoryPreviewStore(),
+      store: new MemoryPreviewStore(),
       shopDomain: "sam-nail-supply.myshopify.com",
       locationId: "79814754495",
       mappings,
@@ -64,7 +64,7 @@ describe("previewBatchConversions", () => {
         "case-29991": 0,
         "base-29991": 1,
       }),
-      store: new InMemoryPreviewStore(),
+      store: new MemoryPreviewStore(),
       shopDomain: "sam-nail-supply.myshopify.com",
       locationId: "79814754495",
       mappings,
@@ -80,7 +80,7 @@ describe("previewBatchConversions", () => {
     await expect(
       previewBatchConversions({
         gateway: gateway({}),
-        store: new InMemoryPreviewStore(),
+        store: new MemoryPreviewStore(),
         shopDomain: "sam-nail-supply.myshopify.com",
         locationId: "79814754495",
         mappings,
