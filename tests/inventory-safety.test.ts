@@ -81,6 +81,15 @@ describe("inventory adjustment preview", () => {
     expect(result.afterQuantity).toBe(5);
   });
 
+  it("blocks unsupported modes at runtime", () => {
+    expect(() =>
+      previewInventoryAdjustment({
+        ...validRequest,
+        mode: "force" as "apply",
+      }),
+    ).toThrow("unsupported mode");
+  });
+
   it("blocks duplicate request IDs", () => {
     expect(() =>
       previewInventoryAdjustment(validRequest, new Set(["adjustment-001"])),
