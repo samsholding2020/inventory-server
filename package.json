@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "validate": "npm run build && npm test"
   },
   "devDependencies": {
     "typescript": "^5.8.3",
