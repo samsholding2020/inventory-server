@@ -81,6 +81,10 @@ export function previewInventoryAdjustment(
   const requestedDelta = requireInteger(request.requestedDelta, "requestedDelta");
   const mode = request.mode ?? "dry-run";
 
+  if (mode !== "dry-run" && mode !== "apply") {
+    throw new InventorySafetyError(`unsupported mode: ${String(mode)}`);
+  }
+
   if (processedRequestIds.has(requestId)) {
     throw new InventorySafetyError(`duplicate requestId: ${requestId}`);
   }
